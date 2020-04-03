@@ -1,0 +1,2 @@
+Cumulocity 		KEYWORD_1
+createMeasurement 	KEYWORD_2
