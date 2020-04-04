@@ -1,4 +1,4 @@
-#include <Cumulocity.h>
+#include <CumulocityClient.h>
 
 void setup() {
   

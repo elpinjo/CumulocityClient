@@ -1,2 +1,2 @@
-Cumulocity 		KEYWORD_1
+CumulocityClient	KEYWORD_1
 createMeasurement 	KEYWORD_2

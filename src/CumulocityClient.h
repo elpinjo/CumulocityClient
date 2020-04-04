@@ -16,14 +16,32 @@
 class CumulocityClient {
 
   public: 
-    CumulocityClient(WiFiClient client, String host, String tenant, String user, String password);
-    createMeasurement();
+    CumulocityClient(WiFiClient client, const char* host, char* tenant, char* user, char* password, const char* deviceId);
+	bool connect();
+	bool connect(char* defaultTemplate);
+	void disconnect();
+	void setDeviceCredentials(char* user, char* password);
+	void registerDevice(char* deviceName, char* deviceType);
+	void retrieveDeviceCredentials();
+	bool checkCredentialsReceived();
+    void createMeasurement();
+	void loop();
+	
+	typedef struct Credentials {
+		char* tenant;
+		char* username;
+		char* password;
+	};
+	
   private:
-    String _host;
-    String _tenant;
-    String _user;
-    String _password;
-    PubSubClient _client;
-}
+	bool connectClient();
+	
+	PubSubClient _client;
+	
+	bool _credentialsReceived;
+    Credentials _credentials;
+	char* _clientId;
+	const char* _deviceId;
+};
 
 #endif
