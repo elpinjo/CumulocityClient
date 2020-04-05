@@ -11,7 +11,8 @@ const char* clientId = "........."; //Should be a unique identifier for this dev
 //uint64_t chipid = ESP.getEfuseMac();
 
 WiFiClient wifiClient;
-CumulocityClient c8yClient(wifiClient, host, tenant, username, c8yPassword, clientId);
+PubSubClient pubSubClient(host, 1883, wifiClient);
+CumulocityClient c8yClient(pubSubClient, tenant, username, c8yPassword, clientId);
 
 void setup() {
 
@@ -24,21 +25,28 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-
+  Serial.println("connected to wifi");
+  
   c8yClient.connect();
   
   Serial.println("Retrieving device credentials");
+  
+  c8yClient.retrieveDeviceCredentials();
   while (!c8yClient.checkCredentialsReceived()) {
     Serial.print("#");
+    delay(1000);
   }
+  
   c8yClient.disconnect();
   c8yClient.connect();
   
   c8yClient.registerDevice("ESP32 - Misja", "c8y_esp32");
-
     
 }
 
 void loop() {
+  
+  delay(1000);
+  c8yClient.loop();
   
 }

@@ -10,31 +10,32 @@
 #define CUMULOCITY_CLIENT_H
 
 #include "Arduino.h"
-#include <WiFiClient.h>
 #include <PubSubClient.h>
+
+typedef struct Credentials {
+	char* tenant;
+	char* username;
+	char* password;
+};
 
 class CumulocityClient {
 
   public: 
-    CumulocityClient(WiFiClient client, const char* host, char* tenant, char* user, char* password, const char* deviceId);
+    CumulocityClient(PubSubClient client, char* tenant, char* user, char* password, const char* deviceId);
 	bool connect();
 	bool connect(char* defaultTemplate);
 	void disconnect();
 	void setDeviceCredentials(char* user, char* password);
 	void registerDevice(char* deviceName, char* deviceType);
 	void retrieveDeviceCredentials();
+	Credentials getCredentials();
 	bool checkCredentialsReceived();
-    void createMeasurement();
+    void createMeasurement(char* fragment, char* series, char* value);
 	void loop();
-	
-	typedef struct Credentials {
-		char* tenant;
-		char* username;
-		char* password;
-	};
 	
   private:
 	bool connectClient();
+	void callbackHandler(const char* topic, byte* payload, unsigned int length);
 	
 	PubSubClient _client;
 	
