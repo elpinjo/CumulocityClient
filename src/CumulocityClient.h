@@ -25,17 +25,21 @@ class CumulocityClient {
 	bool connect();
 	bool connect(char* defaultTemplate);
 	void disconnect();
-	void setDeviceCredentials(char* user, char* password);
+	void setDeviceCredentials(char* tenant, char* user, char* password);
 	void registerDevice(char* deviceName, char* deviceType);
 	void retrieveDeviceCredentials();
 	Credentials getCredentials();
 	bool checkCredentialsReceived();
-    void createMeasurement(char* fragment, char* series, char* value);
+    void createMeasurement(char* fragment, char* series, char* value, char* unit);
 	void loop();
 	
   private:
 	bool connectClient();
 	void callbackHandler(const char* topic, byte* payload, unsigned int length);
+	void parseCredentials(char* payload);
+	char** parseCSV(char* payload);
+	void freeCSVElements(char **parsed);
+	int countFields( const char *line );
 	
 	PubSubClient _client;
 	
