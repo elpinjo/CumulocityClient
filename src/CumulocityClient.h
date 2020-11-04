@@ -21,34 +21,36 @@ typedef struct Credentials {
 class CumulocityClient {
 
   public:
-    CumulocityClient(PubSubClient client, char* tenant, char* user, char* password, const char* deviceId);
-		bool connect();
-		bool connect(char* defaultTemplate);
-		void disconnect();
-		void setDeviceCredentials(char* tenant, char* user, char* password);
-		void registerDevice(char* deviceName, char* deviceType);
-		void retrieveDeviceCredentials();
-		Credentials getCredentials();
-		bool checkCredentialsReceived();
+    CumulocityClient(Client& networkClient, const char* deviceId);
+	bool reconnect();
+	bool connect(char* host, char* tenant, char* user, char* password);
+	bool connect(char* host, char* tenant, char* user, char* password, char* defaultTemplate);
+	void disconnect();
+	void setDeviceCredentials(char* tenant, char* user, char* password);
+	void registerDevice(char* deviceName, char* deviceType);
+	void retrieveDeviceCredentials();
+	Credentials getCredentials();
+	bool checkCredentialsReceived();
     void createMeasurement(char* fragment, char* series, char* value, char* unit);
-		void setKeepAlive(int keepAlive);
-		void loop();
+	void setKeepAlive(int keepAlive);
+	void loop();
 
   private:
-		bool connectClient();
-		void callbackHandler(const char* topic, byte* payload, unsigned int length);
-		void parseCredentials(char* payload);
-		char** parseCSV(char* payload);
-		void freeCSVElements(char **parsed);
-		int countFields( const char *line );
+	bool connectClient();
+	void callbackHandler(const char* topic, byte* payload, unsigned int length);
+	void parseCredentials(char* payload);
+	char** parseCSV(char* payload);
+	void freeCSVElements(char **parsed);
+	int countFields( const char *line );
 
-		PubSubClient _client;
+	PubSubClient _client;
 
-		bool _credentialsReceived;
+	char* _host;
     Credentials _credentials;
-		char* _clientId;
-		int _keepAlive = 600;
-		const char* _deviceId;
+	const char* _clientId;
+	bool _credentialsReceived;
+	int _keepAlive = 600;
+	const char* _deviceId;
 };
 
 #endif

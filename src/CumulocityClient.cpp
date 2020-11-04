@@ -3,35 +3,58 @@
 #include <stdlib.h>
 #include <string.h>
 
-CumulocityClient::CumulocityClient(PubSubClient client, char* tenant, char* user, char* password, const char* deviceId) {
+CumulocityClient::CumulocityClient(Client& networkClient, const char* deviceId) {
 
-  Serial.printf("CumulocityClient(%s, %s, %s)\n", tenant, user, deviceId);
+  Serial.printf("CumulocityClient(%s)\n", deviceId);
 
-  _client = client;
-  _deviceId = deviceId;
+  this->_client = PubSubClient(networkClient);
+  this->_deviceId = deviceId;
+  this->_client.setKeepAlive(_keepAlive);
+}
 
+bool CumulocityClient::reconnect() {
+
+    if (_credentials.tenant != NULL && _credentials.username != NULL && _credentials.password != NULL) {
+        return connectClient();
+    } else {
+        return false;
+    }
+}
+
+bool CumulocityClient::connect(char* host, char* tenant, char* user, char* password) {
+
+  Serial.printf("connect(%s,%s,%s)\n", host, tenant, user);
+
+  _host = host;
   _credentials.tenant = tenant;
   _credentials.username = user;
   _credentials.password = password;
 
-  _client.setKeepAlive(_keepAlive);
-}
+  String myClientId = "d:"; 
+  myClientId += _deviceId;
+  _clientId = myClientId.c_str();
 
-bool CumulocityClient::connect() {
-
-  Serial.println("connect()");
-  _clientId = (char*) malloc(strlen(_deviceId) +3);
-  strcpy(_clientId, "d:");
-  _clientId = strcat(_clientId, _deviceId);
+  _client.setServer(_host, 1883);
 
   return connectClient();
 
 }
 
-bool CumulocityClient::connect(char* defaultTemplate) {
+bool CumulocityClient::connect(char* host, char* tenant, char* user, char* password, char* defaultTemplate) {
 
-  _clientId = (char *) malloc(strlen(_deviceId) + strlen(defaultTemplate) + 4);
-  sprintf(_clientId, "d:%s:%s", _deviceId, defaultTemplate);
+  _host = host;
+  _credentials.tenant = tenant;
+  _credentials.username = user;
+  _credentials.password = password;
+
+  String myClientId = "d:";
+  myClientId += _deviceId; 
+  myClientId += ":";
+  myClientId += defaultTemplate; 
+  _clientId = myClientId.c_str();
+
+  _client.setServer(_host, 1883);
+
   return connectClient();
 
 }
@@ -46,22 +69,22 @@ bool CumulocityClient::connectClient() {
 	}
   );
 
-  char user[512];// = (char*) malloc(strlen(_credentials.tenant) + strlen(_credentials.username) + 2);
+  String user = _credentials.tenant;
+  user += "/";
+  user += _credentials.username;
 
-  sprintf(user, "%s/%s",_credentials.tenant, _credentials.username);
-
-  bool success = _client.connect(_clientId, user, _credentials.password, "s/us", 0, false, "400,c8y_ConnectionEvent,\"Connections lost.\"", true);
-
+  bool success = 
+    _client.connect(_clientId, user.c_str(), _credentials.password, "s/us", 0, 
+      false, "400,c8y_ConnectionEvent,\"Connections lost.\"", true);
 
   if (!success) {
+
 	  Serial.print("Unable to connect to Cumulocity as ");
 	  Serial.println(user);
+      Serial.println(_client.state());
   } else {
 	Serial.println("Connected to cumulocity.");
   }
-
-  //free(user);
-  //Serial.println("Freed the user string");
 
   return success;
 }
@@ -70,7 +93,6 @@ void CumulocityClient::disconnect() {
 
 	Serial.print("disconnect()");
 	_client.disconnect();
-	free(_clientId);
 }
 
 void CumulocityClient::retrieveDeviceCredentials() {
@@ -127,7 +149,7 @@ void CumulocityClient::loop() {
   bool myConnected = _client.loop();
 
   if (!myConnected) {
-    connect();
+    reconnect();
   }
 }
 
