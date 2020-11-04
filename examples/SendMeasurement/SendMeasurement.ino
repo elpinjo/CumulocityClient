@@ -7,11 +7,11 @@
 
 const char* ssid = "........";
 const char* wifiPassword = "........";
-const char* host = "xxx.cumulocity.com";
+char* host = "xxx.cumulocity.com";
 char* username = "........";  // fixed credentials can be registered in the Administration section
 char* c8yPassword = "........"; // create a user in usermanagement with the "device"role and fill the credentials here
 char* tenant = "........"; //tenant ID can be found by clicking on your name in the top right corner of Cumulocity
-const char* clientId = "........."; //Should be a unique identifier for this device, e.g. IMEI, MAC address or SerialNumber
+char* clientId = "........."; //Should be a unique identifier for this device, e.g. IMEI, MAC address or SerialNumber
 //uint64_t chipid = ESP.getEfuseMac();
 
 WiFiClient wifiClient;
