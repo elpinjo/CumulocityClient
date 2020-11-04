@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-CumulocityClient::CumulocityClient(Client& networkClient, const char* deviceId) {
+CumulocityClient::CumulocityClient(Client& networkClient, char* deviceId) {
 
     Serial.printf("CumulocityClient(%s)\n", deviceId);
 
@@ -179,7 +179,7 @@ void CumulocityClient::setDeviceId(char* deviceId, char* defaultTemplate) {
     myClientId += _deviceId; 
     myClientId += ":";
     myClientId += defaultTemplate;
-     
+
     _clientId = (char*) malloc(myClientId.length() +1);
     strcpy(_clientId,myClientId.c_str());
 }
