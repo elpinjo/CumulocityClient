@@ -33,6 +33,8 @@ class CumulocityClient {
 	bool checkCredentialsReceived();
     void createMeasurement(char* fragment, char* series, char* value, char* unit);
 	void setKeepAlive(int keepAlive);
+	void setDeviceId(const char* deviceId);
+	void setDeviceId(const char* deviceId, char* defaultTemplate);
 	void loop();
 
   private:

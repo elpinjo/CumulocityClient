@@ -138,6 +138,8 @@ void storeCredentials() {
 //make a connection to cumulocity
 void connectC8Y() {
   
+  c8yClient.setDeviceId(clientId);
+  
   c8yClient.connect(host, tenant, username, c8yPassword);
   
   Serial.println("Retrieving device credentials");

@@ -5,11 +5,11 @@
 
 CumulocityClient::CumulocityClient(Client& networkClient, const char* deviceId) {
 
-  Serial.printf("CumulocityClient(%s)\n", deviceId);
+    Serial.printf("CumulocityClient(%s)\n", deviceId);
 
-  this->_client = PubSubClient(networkClient);
-  this->_deviceId = deviceId;
-  this->_client.setKeepAlive(_keepAlive);
+    this->_client = PubSubClient(networkClient);
+    this->_deviceId = deviceId;
+    this->_client.setKeepAlive(_keepAlive);
 }
 
 bool CumulocityClient::reconnect() {
@@ -23,70 +23,70 @@ bool CumulocityClient::reconnect() {
 
 bool CumulocityClient::connect(char* host, char* tenant, char* user, char* password) {
 
-  Serial.printf("connect(%s,%s,%s)\n", host, tenant, user);
+    Serial.printf("connect(%s,%s,%s)\n", host, tenant, user);
 
-  _host = host;
-  _credentials.tenant = tenant;
-  _credentials.username = user;
-  _credentials.password = password;
+    _host = host;
+    _credentials.tenant = tenant;
+    _credentials.username = user;
+    _credentials.password = password;
 
-  String myClientId = "d:"; 
-  myClientId += _deviceId;
-  _clientId = myClientId.c_str();
+    String myClientId = "d:"; 
+    myClientId += _deviceId;
+    _clientId = myClientId.c_str();
 
-  _client.setServer(_host, 1883);
+    _client.setServer(_host, 1883);
 
-  return connectClient();
+    return connectClient();
 
 }
 
 bool CumulocityClient::connect(char* host, char* tenant, char* user, char* password, char* defaultTemplate) {
 
-  _host = host;
-  _credentials.tenant = tenant;
-  _credentials.username = user;
-  _credentials.password = password;
+    _host = host;
+    _credentials.tenant = tenant;
+    _credentials.username = user;
+    _credentials.password = password;
 
-  String myClientId = "d:";
-  myClientId += _deviceId; 
-  myClientId += ":";
-  myClientId += defaultTemplate; 
-  _clientId = myClientId.c_str();
+    String myClientId = "d:";
+    myClientId += _deviceId; 
+    myClientId += ":";
+    myClientId += defaultTemplate; 
+    _clientId = myClientId.c_str();
 
-  _client.setServer(_host, 1883);
+    _client.setServer(_host, 1883);
 
-  return connectClient();
+    return connectClient();
 
 }
 
 bool CumulocityClient::connectClient() {
 
-  Serial.println("ConnectClient()");
+    Serial.println("ConnectClient()");
 
-  _client.setCallback(
-	[this](const char* topic, byte* payload, unsigned int length){
-		this->callbackHandler(topic, payload, length);
-	}
-  );
+    _client.setCallback(
+        [this](const char* topic, byte* payload, unsigned int length){
+            this->callbackHandler(topic, payload, length);
+        }
+    );
 
-  String user = _credentials.tenant;
-  user += "/";
-  user += _credentials.username;
+    String user = _credentials.tenant;
+    user += "/";
+    user += _credentials.username;
 
-  bool success = 
-    _client.connect(_clientId, user.c_str(), _credentials.password, "s/us", 0, 
-      false, "400,c8y_ConnectionEvent,\"Connections lost.\"", true);
+    bool success = 
+        _client.connect(_clientId, user.c_str(), _credentials.password, "s/us", 0, 
+        false, "400,c8y_ConnectionEvent,\"Connections lost.\"", true);
 
-  if (!success) {
+    if (!success) {
 
-	  Serial.print("Unable to connect to Cumulocity as ");
-	  Serial.println(user);
-      Serial.println(_client.state());
-  } else {
-	Serial.println("Connected to cumulocity.");
-  }
+        Serial.print("Unable to connect to Cumulocity as ");
+        Serial.println(user);
+        Serial.println(_client.state());
+    } else {
+        Serial.println("Connected to cumulocity.");
+    }
 
-  return success;
+    return success;
 }
 
 void CumulocityClient::disconnect() {
@@ -120,9 +120,9 @@ Credentials CumulocityClient::getCredentials() {
 }
 
 void CumulocityClient::setDeviceCredentials(char* tenant, char* user, char* password) {
-	_credentials.tenant = tenant;
-	_credentials.username = user;
-	_credentials.password = password;
+    _credentials.tenant = tenant;
+    _credentials.username = user;
+    _credentials.password = password;
 }
 
 void CumulocityClient::registerDevice(char* deviceName, char* deviceType){
@@ -146,16 +146,37 @@ void CumulocityClient::createMeasurement(char* fragment, char* series, char* val
 
 void CumulocityClient::loop() {
 
-  bool myConnected = _client.loop();
+    bool myConnected = _client.loop();
 
-  if (!myConnected) {
-    reconnect();
-  }
+    if (!myConnected) {
+        reconnect();
+    }
 }
 
 void CumulocityClient::setKeepAlive(int keepAlive) {
 
-  _keepAlive = keepAlive;
+    _keepAlive = keepAlive;
+}
+
+void CumulocityClient::setDeviceId(const char* deviceId) {
+    _deviceId = deviceId;
+    
+    String myClientId = "d:"; 
+    myClientId += _deviceId;
+    
+    _clientId = myClientId.c_str();
+}
+
+void CumulocityClient::setDeviceId(const char* deviceId, char* defaultTemplate) {
+    _deviceId = deviceId;
+        
+    String myClientId = "d:";
+    myClientId += _deviceId; 
+    myClientId += ":";
+    myClientId += defaultTemplate; 
+    _clientId = myClientId.c_str();
+    
+    _clientId = myClientId.c_str();
 }
 
 void CumulocityClient::callbackHandler(const char* topic, byte* payload, unsigned int length) {
