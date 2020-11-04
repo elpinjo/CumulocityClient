@@ -32,7 +32,9 @@ bool CumulocityClient::connect(char* host, char* tenant, char* user, char* passw
 
     String myClientId = "d:"; 
     myClientId += _deviceId;
-    _clientId = myClientId.c_str();
+
+    _clientId = (char*) malloc(myClientId.length() +1);
+    strcpy(_clientId,myClientId.c_str());
 
     _client.setServer(_host, 1883);
 
@@ -51,7 +53,9 @@ bool CumulocityClient::connect(char* host, char* tenant, char* user, char* passw
     myClientId += _deviceId; 
     myClientId += ":";
     myClientId += defaultTemplate; 
-    _clientId = myClientId.c_str();
+
+    _clientId = (char*) malloc(myClientId.length() +1);
+    strcpy(_clientId,myClientId.c_str());
 
     _client.setServer(_host, 1883);
 
@@ -158,25 +162,26 @@ void CumulocityClient::setKeepAlive(int keepAlive) {
     _keepAlive = keepAlive;
 }
 
-void CumulocityClient::setDeviceId(const char* deviceId) {
+void CumulocityClient::setDeviceId(char* deviceId) {
     _deviceId = deviceId;
     
     String myClientId = "d:"; 
     myClientId += _deviceId;
     
-    _clientId = myClientId.c_str();
+    _clientId = (char*) malloc(myClientId.length() +1);
+    strcpy(_clientId,myClientId.c_str());
 }
 
-void CumulocityClient::setDeviceId(const char* deviceId, char* defaultTemplate) {
+void CumulocityClient::setDeviceId(char* deviceId, char* defaultTemplate) {
     _deviceId = deviceId;
         
     String myClientId = "d:";
     myClientId += _deviceId; 
     myClientId += ":";
-    myClientId += defaultTemplate; 
-    _clientId = myClientId.c_str();
-    
-    _clientId = myClientId.c_str();
+    myClientId += defaultTemplate;
+     
+    _clientId = (char*) malloc(myClientId.length() +1);
+    strcpy(_clientId,myClientId.c_str());
 }
 
 void CumulocityClient::callbackHandler(const char* topic, byte* payload, unsigned int length) {
@@ -204,10 +209,8 @@ void CumulocityClient::parseCredentials(char* payload) {
 	Serial.println("parseCredentials()");
 
 	char** elements = parseCSV(payload);
-	Serial.printf("tenant before update: %s\n", _credentials.tenant);
 	free(elements[0]);
 	_credentials.tenant = elements[1];
-	Serial.println("Pointing tenant to element 1");
 	_credentials.username = elements[2];
 	_credentials.password = elements[3];
 	Serial.println("copied credentials");

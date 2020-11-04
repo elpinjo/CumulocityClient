@@ -21,7 +21,7 @@ typedef struct Credentials {
 class CumulocityClient {
 
   public:
-    CumulocityClient(Client& networkClient, const char* deviceId);
+    CumulocityClient(Client& networkClient, char* deviceId);
 	bool reconnect();
 	bool connect(char* host, char* tenant, char* user, char* password);
 	bool connect(char* host, char* tenant, char* user, char* password, char* defaultTemplate);
@@ -33,8 +33,8 @@ class CumulocityClient {
 	bool checkCredentialsReceived();
     void createMeasurement(char* fragment, char* series, char* value, char* unit);
 	void setKeepAlive(int keepAlive);
-	void setDeviceId(const char* deviceId);
-	void setDeviceId(const char* deviceId, char* defaultTemplate);
+	void setDeviceId(char* deviceId);
+	void setDeviceId(char* deviceId, char* defaultTemplate);
 	void loop();
 
   private:
@@ -49,10 +49,10 @@ class CumulocityClient {
 
 	char* _host;
     Credentials _credentials;
-	const char* _clientId;
+	char* _clientId;
 	bool _credentialsReceived;
 	int _keepAlive = 600;
-	const char* _deviceId;
+	char* _deviceId;
 };
 
 #endif
