@@ -68,7 +68,7 @@ bool CumulocityClient::connectClient() {
     Serial.println("ConnectClient()");
 
     _client.setCallback(
-        [this](const char* topic, byte* payload, unsigned int length){
+        [this](char* topic, byte* payload, unsigned int length){
             this->callbackHandler(topic, payload, length);
         }
     );
@@ -184,7 +184,31 @@ void CumulocityClient::setDeviceId(char* deviceId, char* defaultTemplate) {
     strcpy(_clientId,myClientId.c_str());
 }
 
-void CumulocityClient::callbackHandler(const char* topic, byte* payload, unsigned int length) {
+void CumulocityClient::setSupportedOperations(char* operations) {
+    
+    Serial.printf("setSupportedOperations(%s)\n", operations);
+
+    String myOperations = "114,";
+    myOperations += operations;
+	_client.publish("s/us", myOperations.c_str());
+    _client.subscribe("s/ds");
+}
+
+void CumulocityClient::getPendingOperations() {
+
+    Serial.printf("getPendingOperations()\n");
+
+    _client.publish("s/us", "500");
+}
+
+void CumulocityClient::setCallback(C8Y_CALLBACK_SIGNATURE) {
+
+    Serial.printf("setCallback()\n");
+
+    this->callback = callback;
+}
+
+void CumulocityClient::callbackHandler(char* topic, byte* payload, unsigned int length) {
 
 	Serial.printf("callbackHandler(topic: %s, payload: %s)\n", topic, payload);
 
@@ -194,22 +218,70 @@ void CumulocityClient::callbackHandler(const char* topic, byte* payload, unsigne
 	strncpy(myPayload, (char*)payload,length);
 	myPayload[length] = '\0';
 
-	Serial.printf("Input length = %d, payload = %d\n", length, strlen(myPayload));
-
 	if (strcmp(topic, "s/dcr") == 0 && length > 0) {
 		Serial.print("Device credentials received: ");
 		Serial.println(myPayload);
 		parseCredentials(myPayload);
 		_credentialsReceived = true;
-	}
+	} else if (strcmp(topic, "s/ds") == 0 && length > 0) {
+        if (callback) {
 
+            handleOperation(myPayload);
+        }
+    }
+
+}
+
+void CumulocityClient::handlePayload(char* payload) {
+
+    char** elements = parseCSV(payload);
+
+    char* templateCode = elements[0];
+    char* clientId = elements[1];
+    char* content = elements[2];
+
+    free(elements);
+
+    if(strcmp(_clientId, clientId)) {
+        String fragment;
+        String message;
+
+        if (strcmp(templateCode, "518")==0) {
+            fragment = "c8y_Relay";
+        } else if (strcmp(templateCode, "510")==0) {
+            fragment = "c8y_Restart";
+        } else if (strcmp(templateCode, "511")==0) {
+            fragment = "c8y_Command";
+        } else if (strcmp(templateCode, "513")==0) {
+            fragment = "c8y_Configuration";
+        } else if (strcmp(templateCode, "515")==0) {
+            fragment = "c8y_Firmware";
+        } else if (strcmp(templateCode, "516")==0) {
+            fragment = "c8y_Software";
+        } else if (strcmp(templateCode, "519")==0) {
+            fragment = "c8y_RelayArray";
+        }
+
+        message = "501," + fragment;
+        _client.publish("s/us", message.c_str());
+
+        int status = callback(templateCode, content);
+
+        if (status == 0) {
+            message = "503," + fragment;
+            _client.publish("s/us", message.c_str());
+        } else {
+            message = "502," + fragment;
+            _client.publish("s/us", message.c_str());
+        }
+    }
 }
 
 void CumulocityClient::parseCredentials(char* payload) {
 	Serial.println("parseCredentials()");
 
 	char** elements = parseCSV(payload);
-	free(elements[0]);
+	//free(elements[0]);
 	_credentials.tenant = elements[1];
 	_credentials.username = elements[2];
 	_credentials.password = elements[3];
