@@ -232,7 +232,7 @@ void CumulocityClient::callbackHandler(char* topic, byte* payload, unsigned int 
 
 }
 
-void CumulocityClient::handlePayload(char* payload) {
+void CumulocityClient::handleOperation(char* payload) {
 
     char** elements = parseCSV(payload);
 

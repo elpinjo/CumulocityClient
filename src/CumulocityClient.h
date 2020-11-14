@@ -54,7 +54,7 @@ class CumulocityClient {
   private:
 	bool connectClient();
 	void callbackHandler(char* topic, byte* payload, unsigned int length);
-	void handleOperation();
+	void handleOperation(char* payload);
 	void parseCredentials(char* payload);
 	char** parseCSV(char* payload);
 	void freeCSVElements(char **parsed);
