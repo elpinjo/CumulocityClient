@@ -39,7 +39,9 @@ class CumulocityClient {
 	
 	bool reconnect();
 	bool connect(char* host, char* tenant, char* user, char* password);
+	bool connect(char* host, uint16_t port, char* tenant, char* user, char* password);
 	bool connect(char* host, char* tenant, char* user, char* password, char* defaultTemplate);
+	bool connect(char* host, uint16_t port, char* tenant, char* user, char* password, char* defaultTemplate);
 	void disconnect();
 
 	void setDeviceCredentials(char* tenant, char* user, char* password);
@@ -65,6 +67,7 @@ class CumulocityClient {
 	PubSubClient _client;
 
 	char* _host;
+	uint16_t _port;
     Credentials _credentials;
 	char* _clientId;
 	bool _credentialsReceived;
