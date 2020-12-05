@@ -12,10 +12,6 @@ char *username = "........";    // fixed credentials can be registered in the Ad
 char *c8yPassword = "........"; // create a user in usermanagement with the "device"role and fill the credentials here
 char *tenant = "........";      //tenant ID can be found by clicking on your name in the top right corner of Cumulocity
 char *clientId = ".........";   //Should be a unique identifier for this device, e.g. IMEI, MAC address or SerialNumber
-const char *root_ca =
-    "-----BEGIN CERTIFICATE-----\n"
-    ".....CERT CONTENT............\n"
-    "-----END CERTIFICATE-----\n";
 
 WiFiClientSecure wifiClient;
 CumulocityClient c8yClient(wifiClient, clientId);
@@ -23,11 +19,9 @@ CumulocityClient c8yClient(wifiClient, clientId);
 void setup()
 {
     Serial.begin(115200);
-
-    wifiClient.setCACert(root_ca);
-    WiFi.begin(ssid, wifiPassword);
-
     Serial.print("Connecting to WiFi");
+
+    WiFi.begin(ssid, wifiPassword);
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
