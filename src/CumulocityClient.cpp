@@ -22,10 +22,14 @@ bool CumulocityClient::reconnect() {
 }
 
 bool CumulocityClient::connect(char* host, char* tenant, char* user, char* password) {
+    return connect(host, 1883, tenant, user, password);
+}
 
+bool CumulocityClient::connect(char* host, uint16_t port, char* tenant, char* user, char* password) {
     Serial.printf("connect(%s,%s,%s)\n", host, tenant, user);
 
     _host = host;
+    _port = port;
     _credentials.tenant = tenant;
     _credentials.username = user;
     _credentials.password = password;
@@ -36,15 +40,20 @@ bool CumulocityClient::connect(char* host, char* tenant, char* user, char* passw
     _clientId = (char*) malloc(myClientId.length() +1);
     strcpy(_clientId,myClientId.c_str());
 
-    _client.setServer(_host, 1883);
+    _client.setServer(_host, _port);
 
     return connectClient();
 
 }
 
 bool CumulocityClient::connect(char* host, char* tenant, char* user, char* password, char* defaultTemplate) {
+    return connect(host, 1883, tenant, user, password, defaultTemplate);
+}
+
+bool CumulocityClient::connect(char* host, uint16_t port, char* tenant, char* user, char* password, char* defaultTemplate) {
 
     _host = host;
+    _port = port;
     _credentials.tenant = tenant;
     _credentials.username = user;
     _credentials.password = password;
@@ -57,7 +66,7 @@ bool CumulocityClient::connect(char* host, char* tenant, char* user, char* passw
     _clientId = (char*) malloc(myClientId.length() +1);
     strcpy(_clientId,myClientId.c_str());
 
-    _client.setServer(_host, 1883);
+    _client.setServer(_host, _port);
 
     return connectClient();
 
